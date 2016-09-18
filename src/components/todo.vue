@@ -4,20 +4,25 @@
     v-bind:class="{editing : editedTodo == todo}"
   >
     <div class="view" v-on:click="editTodo"> {{todo.text}} </div>
-    <input
+    <textarea
       type="text"
+      rows="1"
       v-model="todo.text"
       v-on:blur="doneEdit"
       v-on:keyup.enter="doneEdit"
       v-todo-focus="editedTodo == todo"
-    >
+    ></textarea>
   </li>
 </template>
 
 <script>
 import Vue from 'vue';
+import autosize from 'autosize';
 export default {
   props: ['todo', 'editedTodo'],
+  ready() {
+    autosize(this.$el.querySelector('textarea'));
+  },
   computed: {
     backgroundColor() {
       return `rgb(220, ${this.todo.position * 5}, 30)`;
@@ -53,7 +58,7 @@ export default {
     font-size: 1.5em;
     line-height: 1.4;
     color: white;
-    input {
+    textarea {
       display: none;
       border: 0;
     }
@@ -63,7 +68,7 @@ export default {
       .view {
         display: none;
       }
-      input {
+      textarea {
         display: block;
         width: 100%;
         background: transparent;
