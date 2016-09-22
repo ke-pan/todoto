@@ -28,7 +28,7 @@ export default {
   },
   computed: {
     backgroundColor() {
-      return `rgb(220, ${this.index * 5}, 30)`;
+      return `rgb(220, ${this.index * 20}, 30)`;
     },
   },
   methods: {

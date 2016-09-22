@@ -1,6 +1,5 @@
 <template>
   <div id="app" v-touch:panmove="pullDown" v-touch:panend="pullToAdd">
-    <div class="mask" v-show="editedTodo != null"></div>
     <div class="container" v-bind:style="{top: pullHeight}">
       <div class="pull-down" style="background-color: rgb(220, 0, 30);" v-bind:style="{transform: pullRotate}">
         <div class="wrapper">
@@ -11,8 +10,10 @@
         <todo v-for="todo in todos" :todo="todo" :edited-todo="editedTodo" :index="$index"></todo>
         <todo v-for="todo in doneTodos" :todo="todo" :edited-todo="editedTodo" :index="$index"></todo>
       </ul>
+      <div class="mask" v-show="editedTodo != null"></div>
     </div>
-    <div class="remain" v-on:click.self="tapToAdd"></div>
+    <div class="notice" v-show="emptyTodos"> Pull down to create a todo </div>
+    <div v-show="!editing" class="remain" v-on:click.self="tapToAdd"></div>
   </div>
 </template>
 
@@ -29,6 +30,9 @@ export default {
   },
   methods: {
     pullDown(e) {
+      if (this.editing) {
+        return;
+      }
       let pullDownY = e.deltaY;
       pullDownY = Math.min(45, pullDownY);
       pullDownY = Math.max(0, pullDownY);
@@ -75,6 +79,12 @@ export default {
     },
   },
   computed: {
+    emptyTodos() {
+      return this.todos.length + this.doneTodos.length === 0;
+    },
+    editing() {
+      return this.editedTodo !== null;
+    },
     pullRotate() {
       return `rotateX(${((45 - this.pullDownY) * 90 / 45)}deg)`;
     },
@@ -87,7 +97,7 @@ export default {
       this.editTodo(todo);
     },
     'done-edit': function (todo) {
-      if (!this.editedTodo) {
+      if (!this.editing) {
         return;
       }
       this.editedTodo = null;
@@ -125,9 +135,19 @@ export default {
     margin: 0;
     padding: 0;
     height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
     .remain {
       height: 100%;
     }
+  }
+
+  .notice {
+    position: absolute;
+    top: 40%;
+    width: 100%;
+    text-align: center;
+    font-size: 2em;
+    color: white;
   }
 
   .container {
@@ -138,17 +158,14 @@ export default {
 
   .pull-down {
     transform-origin: bottom;
-    // transform: rotateX(45deg);
-    // transition-duration: 1s;
-    // transition-property: all;
   }
 
   .wrapper {
-    border: 1px solid red;
     padding: 0.2em 0.5em;
     font-size: 1.5em;
     line-height: 1.4;
     color: white;
+    // min-height: 50px;
   }
 
   ul {
@@ -163,8 +180,7 @@ export default {
     bottom: 0;
     left: 0;
     right: 0;
-    background-color: black;
-    opacity: 0.7;
+    background-color: rgba(0, 0, 0, 0.7);
   }
 
 </style>
