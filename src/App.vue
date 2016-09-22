@@ -1,5 +1,6 @@
 <template>
   <div id="app" v-touch:panmove="pullDown" v-touch:panend="pullToAdd">
+    <div class="mask" v-show="editedTodo != null"></div>
     <div class="container" v-bind:style="{top: pullHeight}">
       <div class="pull-down" style="background-color: rgb(220, 0, 30);" v-bind:style="{transform: pullRotate}">
         <div class="wrapper">
@@ -7,13 +8,11 @@
         </div>
       </div>
       <ul class="todo-list">
-        <todo v-for="todo in unDoneTodos" :todo="todo" :edited-todo="editedTodo"></todo>
-        <todo v-for="todo in doneTodos" :todo="todo" :edited-todo="editedTodo"></todo>
+        <todo v-for="todo in todos" :todo="todo" :edited-todo="editedTodo" :index="$index"></todo>
+        <todo v-for="todo in doneTodos" :todo="todo" :edited-todo="editedTodo" :index="$index"></todo>
       </ul>
-      <div class="remain" v-on:click.self="addTodo"></div>
-      <div class="mask" v-show="editedTodo != null">
     </div>
-    </div>
+    <div class="remain" v-on:click.self="tapToAdd"></div>
   </div>
 </template>
 
@@ -23,6 +22,7 @@ export default {
   data() {
     return {
       todos: [],
+      doneTodos: [],
       editedTodo: null,
       pullDownY: 0,
     };
@@ -34,32 +34,47 @@ export default {
       pullDownY = Math.max(0, pullDownY);
       this.pullDownY = pullDownY;
     },
+    newTodo() {
+      return {
+        text: '',
+        done: false,
+      };
+    },
+    editTodo(todo) {
+      this.editedTodo = todo;
+    },
     pullToAdd() {
       if (this.pullDownY > 40) {
-        this.addTodo();
+        const newTodo = this.newTodo();
+        this.todos.unshift(newTodo);
+        this.editTodo(newTodo);
       }
       this.pullDownY = 0;
     },
-    addTodo() {
-      const todo = {
-        text: 'new todo',
-        done: false,
-        position: this.todos.length,
-      }
-      this.todos.push(todo);
-      this.editedTodo = todo;
+    tapToAdd() {
+      const newTodo = this.newTodo();
+      this.todos.push(newTodo);
+      this.editTodo(newTodo);
     },
     removeTodo(todo) {
-      this.todos.$remove(todo);
+      if (todo.done) {
+        this.doneTodos.$remove(todo);
+      } else {
+        this.todos.$remove(todo);
+      }
+    },
+    toggleDone(todo) {
+      if (todo.done) {
+        this.doneTodos.$remove(todo);
+        this.todos.push(todo);
+      } else {
+        this.todos.$remove(todo);
+        this.doneTodos.unshift(todo);
+      }
+      todo.done = !todo.done;
     },
   },
   computed: {
-    doneTodos() {
-      return this.todos.filter(todo => todo.done);
-    },
-    unDoneTodos() {
-      return this.todos.filter(todo => !todo.done);
-    },
     pullRotate() {
       return `rotateX(${((45 - this.pullDownY) * 90 / 45)}deg)`;
     },
@@ -69,7 +84,7 @@ export default {
   },
   events: {
     'edit-todo': function (todo) {
-      this.editedTodo = todo;
+      this.editTodo(todo);
     },
     'done-edit': function (todo) {
       if (!this.editedTodo) {
@@ -83,6 +98,9 @@ export default {
     },
     'remove-todo': function (todo) {
       this.removeTodo(todo);
+    },
+    'toggle-done': function (todo) {
+      this.toggleDone(todo);
     },
   },
   components: {

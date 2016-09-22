@@ -22,13 +22,13 @@
 import Vue from 'vue';
 import autosize from 'autosize';
 export default {
-  props: ['todo', 'editedTodo'],
+  props: ['todo', 'editedTodo', 'index'],
   ready() {
     autosize(this.$el.querySelector('textarea'));
   },
   computed: {
     backgroundColor() {
-      return `rgb(220, ${this.todo.position * 5}, 30)`;
+      return `rgb(220, ${this.index * 5}, 30)`;
     },
   },
   methods: {
@@ -42,7 +42,7 @@ export default {
       this.$dispatch('edit-todo', this.todo);
     },
     toggleDone() {
-      this.todo.done = !this.todo.done;
+      this.$dispatch('toggle-done', this.todo);
     },
     removeTodo() {
       this.$dispatch('remove-todo', this.todo);
