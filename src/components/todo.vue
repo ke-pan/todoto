@@ -1,8 +1,13 @@
 <template>
   <li class="todo"
-    v-bind:class="{editing : editedTodo == todo, done: todo.done}"
+    v-bind:class="{editing : editing, done: todo.done, dragging: dragging, 'not-dragging': !dragging}"
     v-touch:swiperight="toggleDone"
     v-touch:swipeleft="removeTodo"
+    v-touch:panstart="dragStart"
+    v-touch:panend="dragEnd"
+    v-touch:pandown.stop="drag($event, 'down')"
+    v-touch:panup.stop="drag($event, 'up')"
+    v-bind:style="{top: top}"
     >
     <div class="wrapper" v-bind:style="{backgroundColor: backgroundColor}">
       <div class="view" v-touch:tap="editTodo"> {{todo.text}} </div>
@@ -23,12 +28,23 @@ import Vue from 'vue';
 import autosize from 'autosize';
 export default {
   props: ['todo', 'editedTodo', 'index'],
+  data() {
+    return {
+      dragging: false,
+      top: '0px',
+      originTop: 0,
+      originBottom: 0,
+    }
+  },
   ready() {
     autosize(this.$el.querySelector('textarea'));
   },
   computed: {
     backgroundColor() {
       return `rgb(220, ${this.index * 20}, 30)`;
+    },
+    editing() {
+      return this.editedTodo === this.todo;
     },
   },
   methods: {
@@ -46,6 +62,32 @@ export default {
     },
     removeTodo() {
       this.$dispatch('remove-todo', this.todo);
+    },
+    dragStart() {
+      this.originTop = this.$el.offsetTop;
+      this.originBottom = this.originTop + this.$el.offsetHeight;
+      this.dragging = true;
+      this.$dispatch('drag-todo', this.index);
+    },
+    dragEnd() {
+      this.dragging = false;
+      this.top = '0px';
+      this.$dispatch('drag-todo-end', this.todo);
+    },
+    drag(e, dir) {
+      // console.log(e);
+      let top;
+      let bottom;
+      Vue.nextTick(() => {
+        top = this.originTop + e.deltaY;
+        this.top = `${top}px`;
+        if (dir === 'down') {
+          bottom = this.originBottom + e.deltaY;
+          this.$dispatch('drag', bottom);
+        } else {
+          this.$dispatch('drag', top);
+        }
+      });
     },
   },
   directives: {
@@ -66,6 +108,11 @@ export default {
 <style lang="scss">
   .todo {
     perspective: 50em;
+    &.dragging {
+      position: absolute;
+      z-index: 1000;
+      width: 100%;
+    }
     &.editing {
       position: relative;
       z-index: 10;

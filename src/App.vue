@@ -1,5 +1,5 @@
 <template>
-  <div id="app" v-touch:panmove="pullDown" v-touch:panend="pullToAdd">
+  <div id="app">
     <div class="container" v-bind:style="{top: pullHeight}">
       <div class="pull-down" style="background-color: rgb(220, 0, 30);" v-bind:style="{transform: pullRotate}">
         <div class="wrapper">
@@ -7,13 +7,19 @@
         </div>
       </div>
       <ul class="todo-list">
-        <todo v-for="todo in todos" :todo="todo" :edited-todo="editedTodo" :index="$index"></todo>
+        <todo
+          v-for="todo in todos"
+          :todo="todo"
+          :edited-todo="editedTodo"
+          :index="$index">
+        </todo>
         <todo v-for="todo in doneTodos" :todo="todo" :edited-todo="editedTodo" :index="$index"></todo>
+        <div id="placeholder" v-show="dragging"></div>
       </ul>
       <div class="mask" v-show="editedTodo != null"></div>
     </div>
     <div class="notice" v-show="emptyTodos"> Pull down to create a todo </div>
-    <div v-show="!editing" class="remain" v-on:click.self="tapToAdd"></div>
+    <div v-show="!editing" class="remain" v-on:click.self="tapToAdd"  v-touch:panmove="pullDown" v-touch:panend="pullToAdd"></div>
   </div>
 </template>
 
@@ -26,15 +32,17 @@ export default {
       doneTodos: [],
       editedTodo: null,
       pullDownY: 0,
+      dragging: false,
+      placeholderPosition: -1,
     };
   },
   methods: {
     pullDown(e) {
-      if (this.editing) {
+      if (this.editing || this.dragging) {
         return;
       }
       let pullDownY = e.deltaY;
-      pullDownY = Math.min(45, pullDownY);
+      pullDownY = Math.min(45, pullDownY); // TODO
       pullDownY = Math.max(0, pullDownY);
       this.pullDownY = pullDownY;
     },
@@ -60,6 +68,10 @@ export default {
       this.todos.push(newTodo);
       this.editTodo(newTodo);
     },
+    reorderTodo(todo) {
+      this.todos.$remove(todo);
+      this.todos.splice(this.placeholderPosition, 0, todo);
+    },
     removeTodo(todo) {
       if (todo.done) {
         this.doneTodos.$remove(todo);
@@ -76,6 +88,20 @@ export default {
         this.doneTodos.unshift(todo);
       }
       todo.done = !todo.done;
+    },
+    listCenters() {
+      return Array.prototype.map.call(this.$el.querySelectorAll('.todo.not-dragging'), el =>
+        el.offsetTop + el.offsetHeight / 2
+      );
+    },
+    getPosition(side) {
+      const listCenters = this.listCenters()
+      for (let i = 0; i < listCenters.length; i += 1) {
+        if (side < listCenters[i]) {
+          return i;
+        }
+      }
+      return listCenters.length;
     },
   },
   computed: {
@@ -112,6 +138,28 @@ export default {
     'toggle-done': function (todo) {
       this.toggleDone(todo);
     },
+    'drag-todo': function (index) {
+      this.dragging = true;
+      const placeholder = this.$el.querySelector('#placeholder');
+      this.$el.querySelector('ul').insertBefore(
+        placeholder,
+        this.$el.querySelectorAll('.todo')[index]
+      );
+    },
+    'drag-todo-end': function (todo) {
+      this.dragging = false;
+      this.reorderTodo(todo);
+    },
+    drag(side) {
+      const el = this.$el;
+      const position = this.getPosition(side);
+      if (position !== this.placeholderPosition) {
+        this.placeholderPosition = position;
+        const placeholder = el.querySelector('#placeholder');
+        el.querySelector('ul')
+          .insertBefore(placeholder, el.querySelectorAll('.todo.not-dragging')[position]);
+      }
+    },
   },
   components: {
     todo: Todo,
@@ -139,6 +187,10 @@ export default {
     .remain {
       height: 100%;
     }
+  }
+
+  #placeholder {
+    height: 2em;
   }
 
   .notice {
@@ -169,6 +221,7 @@ export default {
   }
 
   ul {
+    position: relative;
     margin: 0;
     padding: 0;
     list-style: none;
