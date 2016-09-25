@@ -76,16 +76,21 @@ export default {
       this.top = `${this.originTop}px`
       this.left = `${this.originLeft}px`
       this.originBottom = this.originTop + this.$el.offsetHeight;
-      this.$dispatch('drag-todo', this.index);
+      this.$dispatch('drag-todo', this.index, this.$el.offsetHeight);
     },
     dragEnd() {
       if (!this.dragging) return;
-      this.dragging = false;
-      this.$dispatch('drag-todo-end', this.todo);
+      console.log('drag end');
+      Vue.nextTick(() => {
+        this.top = '0px';
+        this.left = '0px';
+        this.dragging = false;
+        this.$dispatch('drag-todo-end', this.todo);
+      });
     },
     drag(e) {
       if (!this.dragging) return;
-      console.log(e);
+      console.log('drag');
       let top;
       let left;
       let bottom;

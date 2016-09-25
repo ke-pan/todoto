@@ -14,7 +14,7 @@
           :index="$index">
         </todo>
         <todo v-for="todo in doneTodos" :todo="todo" :edited-todo="editedTodo" :index="$index"></todo>
-        <div id="placeholder" v-show="dragging"></div>
+        <div id="placeholder" v-show="dragging" v-bind:style="{height: placeholderHeight}"></div>
       </ul>
       <div class="mask" v-show="editedTodo != null"></div>
     </div>
@@ -34,6 +34,7 @@ export default {
       pullDownY: 0,
       dragging: false,
       placeholderPosition: -1,
+      placeholderHeight: '0px',
     };
   },
   methods: {
@@ -138,8 +139,9 @@ export default {
     'toggle-done': function (todo) {
       this.toggleDone(todo);
     },
-    'drag-todo': function (index) {
+    'drag-todo': function (index, height) {
       this.dragging = true;
+      this.placeholderHeight = `${height}px`;
       const placeholder = this.$el.querySelector('#placeholder');
       this.$el.querySelector('ul').insertBefore(
         placeholder,
