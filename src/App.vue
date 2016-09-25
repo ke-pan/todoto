@@ -19,7 +19,7 @@
       <div class="mask" v-show="editedTodo != null"></div>
     </div>
     <div class="notice" v-show="emptyTodos"> Pull down to create a todo </div>
-    <div v-show="!editing" class="remain" v-on:click.self="tapToAdd"  v-touch:panmove="pullDown" v-touch:panend="pullToAdd"></div>
+    <div v-show="!editing" class="remain" v-on:click.self="tapToAdd" v-touch:panmove="pullDown" v-touch:panend="pullToAdd"></div>
   </div>
 </template>
 

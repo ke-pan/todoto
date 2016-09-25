@@ -3,6 +3,7 @@
     v-bind:class="{editing : editing, done: todo.done, dragging: dragging, 'not-dragging': !dragging}"
     v-touch:swiperight="toggleDone"
     v-touch:swipeleft="removeTodo"
+    v-touch:press="press"
     v-touch:panstart="dragStart"
     v-touch:panend="dragEnd"
     v-touch:pandown.stop="drag($event, 'down')"
@@ -30,6 +31,7 @@ export default {
   props: ['todo', 'editedTodo', 'index'],
   data() {
     return {
+      draggable: false,
       dragging: false,
       top: '0px',
       originTop: 0,
@@ -58,23 +60,35 @@ export default {
       this.$dispatch('edit-todo', this.todo);
     },
     toggleDone() {
+      if (this.draggable) return;
       this.$dispatch('toggle-done', this.todo);
     },
     removeTodo() {
+      if (this.draggable) return;
       this.$dispatch('remove-todo', this.todo);
     },
+    press() {
+      if (this.todo.done) return;
+      this.draggable = true;
+    },
     dragStart() {
+      if (!this.draggable) return;
+      console.log('drag start');
       this.originTop = this.$el.offsetTop;
       this.originBottom = this.originTop + this.$el.offsetHeight;
       this.dragging = true;
       this.$dispatch('drag-todo', this.index);
     },
     dragEnd() {
+      if (!this.draggable) return;
+      console.log('drag end');
       this.dragging = false;
       this.top = '0px';
       this.$dispatch('drag-todo-end', this.todo);
     },
     drag(e, dir) {
+      if (!this.dragging) return;
+      console.log('drag');
       // console.log(e);
       let top;
       let bottom;
