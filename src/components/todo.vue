@@ -82,7 +82,6 @@ export default {
     },
     dragEnd() {
       if (!this.dragging) return;
-      console.log('drag end');
       Vue.nextTick(() => {
         this.top = '0px';
         this.left = '0px';
@@ -92,7 +91,6 @@ export default {
     },
     drag(e) {
       if (!this.dragging) return;
-      console.log('drag');
       let top;
       let left;
       let bottom;

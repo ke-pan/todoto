@@ -13,13 +13,15 @@
           :edited-todo="editedTodo"
           :index="$index">
         </todo>
+      </ul>
+      <ul class="done-todo-list">
         <todo v-for="todo in doneTodos" :todo="todo" :edited-todo="editedTodo" :index="$index"></todo>
-        <div id="placeholder" v-show="dragging" v-bind:style="{height: placeholderHeight}"></div>
       </ul>
       <div class="mask" v-show="editedTodo != null"></div>
     </div>
     <div class="notice" v-show="emptyTodos"> Pull down to create a todo </div>
     <div v-show="!editing" class="remain" v-on:click.self="tapToAdd" v-touch:panmove="pullDown" v-touch:panend="pullToAdd"></div>
+    <div id="placeholder" v-show="dragging" v-bind:style="{height: placeholderHeight}"></div>
   </div>
 </template>
 
@@ -150,6 +152,8 @@ export default {
     },
     'drag-todo-end': function (todo) {
       this.dragging = false;
+      const placeholder = this.$el.querySelector('#placeholder');
+      this.$el.insertBefore(placeholder, null);
       this.reorderTodo(todo);
     },
     drag(side) {
