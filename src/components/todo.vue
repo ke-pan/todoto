@@ -4,7 +4,7 @@
     v-touch:swiperight="toggleDone"
     v-touch:swipeleft="removeTodo"
     v-touch:press="press"
-    v-touch:panstart="dragStart"
+    v-touch:pressup="dragEnd"
     v-touch:panend="dragEnd"
     v-touch:pan.stop="drag"
     v-bind:style="{top: top, left: left}"
@@ -61,32 +61,26 @@ export default {
       this.$dispatch('edit-todo', this.todo);
     },
     toggleDone() {
-      if (this.draggable) return;
+      if (this.dragging) return;
       this.$dispatch('toggle-done', this.todo);
     },
     removeTodo() {
-      if (this.draggable) return;
+      if (this.dragging) return;
       this.$dispatch('remove-todo', this.todo);
     },
     press() {
       if (this.todo.done) return;
-      this.draggable = true;
-    },
-    dragStart() {
-      if (!this.draggable) return;
-      // console.log('drag start');
+      this.dragging = true;
       this.originTop = this.$el.offsetTop;
       this.originLeft = this.$el.offsetLeft;
+      this.top = `${this.originTop}px`
+      this.left = `${this.originLeft}px`
       this.originBottom = this.originTop + this.$el.offsetHeight;
-      this.dragging = true;
       this.$dispatch('drag-todo', this.index);
     },
     dragEnd() {
-      if (!this.draggable) return;
-      // console.log('drag end');
+      if (!this.dragging) return;
       this.dragging = false;
-      this.draggable = false;
-      this.top = '0px';
       this.$dispatch('drag-todo-end', this.todo);
     },
     drag(e) {
@@ -131,6 +125,10 @@ export default {
       position: absolute;
       z-index: 1000;
       width: 100%;
+      transform: scaleY(1.1);
+      border-right: 1px solid rgba(0, 0, 0, 0.7);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.7);
+      box-shadow: 1px 1px 2px black;
     }
     &.editing {
       position: relative;
