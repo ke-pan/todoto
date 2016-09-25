@@ -185,13 +185,14 @@ export default {
     margin: 0;
     padding: 0;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: rgb(39, 41, 47);
     .remain {
       height: 100%;
     }
   }
 
   #placeholder {
+    background: rgb(39, 41, 47);
     height: 2em;
   }
 
@@ -219,7 +220,6 @@ export default {
     font-size: 1.5em;
     line-height: 1.4;
     color: white;
-    // min-height: 50px;
   }
 
   ul {
@@ -235,7 +235,7 @@ export default {
     bottom: 0;
     left: 0;
     right: 0;
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: rgba(39, 41, 47, 0.9);
   }
 
 </style>

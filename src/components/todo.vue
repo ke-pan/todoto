@@ -30,7 +30,6 @@ export default {
   props: ['todo', 'editedTodo', 'index'],
   data() {
     return {
-      draggable: false,
       dragging: false,
       top: '0px',
       left: '0px',
@@ -138,9 +137,6 @@ export default {
     &.editing {
       position: relative;
       z-index: 10;
-      .wrapper {
-        transform: translateZ(1em);
-      }
       .view {
         display: none;
       }
