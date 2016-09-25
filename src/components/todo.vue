@@ -6,9 +6,8 @@
     v-touch:press="press"
     v-touch:panstart="dragStart"
     v-touch:panend="dragEnd"
-    v-touch:pandown.stop="drag($event, 'down')"
-    v-touch:panup.stop="drag($event, 'up')"
-    v-bind:style="{top: top}"
+    v-touch:pan.stop="drag"
+    v-bind:style="{top: top, left: left}"
     >
     <div class="wrapper" v-bind:style="{backgroundColor: backgroundColor}">
       <div class="view" v-touch:tap="editTodo"> {{todo.text}} </div>
@@ -34,8 +33,10 @@ export default {
       draggable: false,
       dragging: false,
       top: '0px',
+      left: '0px',
       originTop: 0,
       originBottom: 0,
+      originLeft: 0,
     }
   },
   ready() {
@@ -73,32 +74,36 @@ export default {
     },
     dragStart() {
       if (!this.draggable) return;
-      console.log('drag start');
+      // console.log('drag start');
       this.originTop = this.$el.offsetTop;
+      this.originLeft = this.$el.offsetLeft;
       this.originBottom = this.originTop + this.$el.offsetHeight;
       this.dragging = true;
       this.$dispatch('drag-todo', this.index);
     },
     dragEnd() {
       if (!this.draggable) return;
-      console.log('drag end');
+      // console.log('drag end');
       this.dragging = false;
+      this.draggable = false;
       this.top = '0px';
       this.$dispatch('drag-todo-end', this.todo);
     },
-    drag(e, dir) {
+    drag(e) {
       if (!this.dragging) return;
-      console.log('drag');
-      // console.log(e);
+      console.log(e);
       let top;
+      let left;
       let bottom;
       Vue.nextTick(() => {
         top = this.originTop + e.deltaY;
+        left = this.originLeft + e.deltaX;
         this.top = `${top}px`;
-        if (dir === 'down') {
+        this.left = `${left}px`;
+        if (e.additionalEvent === 'pandown') {
           bottom = this.originBottom + e.deltaY;
           this.$dispatch('drag', bottom);
-        } else {
+        } else if (e.additionalEvent === 'panup') {
           this.$dispatch('drag', top);
         }
       });
