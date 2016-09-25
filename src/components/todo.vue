@@ -43,6 +43,9 @@ export default {
   },
   computed: {
     backgroundColor() {
+      if (this.todo.done) {
+        return 'transparent';
+      }
       return `rgb(220, ${this.index * 20}, 30)`;
     },
     editing() {
@@ -153,7 +156,11 @@ export default {
       border: 0;
     }
     &.done {
-      text-decoration: line-through;
+      .view {
+        text-decoration-style: line-through;
+        text-decoration-color: rgb(105, 109, 121);
+        color: rgb(105, 109, 121);
+      }
     }
   }
 </style>
