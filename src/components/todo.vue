@@ -157,7 +157,7 @@ export default {
     }
     &.done {
       .view {
-        text-decoration-style: line-through;
+        text-decoration: line-through;
         text-decoration-color: rgb(105, 109, 121);
         color: rgb(105, 109, 121);
       }
