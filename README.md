@@ -1,6 +1,8 @@
 # todoto
 
-> A todo APP on phone
+ A todo APP on phone
+
+![gif](doc/todoto.gif)
 
 ## Build Setup
 
